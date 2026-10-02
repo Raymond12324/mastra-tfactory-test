@@ -32,16 +32,18 @@ The service stores data in `data/tasks.sqlite` by default. The parent directory 
 npm run dev
 ```
 
-The default listener is `http://localhost:3000`. Configure it with:
+The default listener is `http://localhost:3000`. Use `.env.example` as a reference when supplying configuration through your runtime environment:
 
-- `PORT` — HTTP port; defaults to `3000`.
-- `DATABASE_PATH` — SQLite database path; defaults to `data/tasks.sqlite`.
+- `PORT` — HTTP port; defaults to `3000` and must be an integer from `1` through `65535`.
+- `DATABASE_PATH` — SQLite database path; defaults to `data/tasks.sqlite` and cannot be blank.
 
 For example:
 
 ```bash
 PORT=3001 DATABASE_PATH=/tmp/tasks.sqlite npm run dev
 ```
+
+This Node-only service has no public or client-side environment-variable surface. Do not add provider credentials until the corresponding server integration exists.
 
 ## API
 
