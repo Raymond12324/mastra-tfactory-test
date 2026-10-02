@@ -1,6 +1,6 @@
-# Task service foundation
+# Task Manager foundation
 
-A small TypeScript HTTP service for creating and managing tasks. It uses Express for routing, SQLite for local persistence, Zod for request validation, and Vitest for integration coverage.
+This repository contains the MVP's Next.js frontend foundation and the existing Express task API. The frontend is the primary application: it uses Next.js App Router, TypeScript, Tailwind CSS, and shadcn/ui conventions. The API remains available as a separate local service while product work is added.
 
 ## Prerequisites
 
@@ -13,66 +13,54 @@ A small TypeScript HTTP service for creating and managing tasks. It uses Express
 npm ci
 ```
 
-The service stores data in `data/tasks.sqlite` by default. The parent directory and database schema are created automatically when the service starts.
-
-## Commands
+## Frontend commands
 
 | Command | Purpose |
 | --- | --- |
-| `npm run dev` | Start the service with file watching. |
-| `npm run build` | Compile TypeScript to `dist/`. |
-| `npm start` | Run the compiled service. |
-| `npm test -- --run` | Run the test suite once. |
-| `npm run lint` | Lint application and test TypeScript. |
-| `npm run typecheck` | Check TypeScript without emitting files. |
+| `npm run dev` | Start the Next.js application with file watching at `http://localhost:3000`. |
+| `npm run build` | Create the production Next.js build in `.next/`. |
+| `npm start` | Start the production Next.js application after a build. |
+| `npm run typecheck` | Check both the frontend and retained API TypeScript projects. |
+| `npm run lint` | Lint frontend, API, and test source files. |
+| `npm test -- --run` | Run the API regression test suite once. |
 
-## Run locally
+## Frontend structure
 
-```bash
-npm run dev
-```
+- `app/` — App Router layouts, routes, and global styles.
+- `components/ui/` — shared shadcn/ui-style primitives.
+- `features/` — product code grouped by feature; the first task feature starts in `features/tasks/`.
+- `lib/` — shared frontend utilities, including the `cn` class-name helper.
 
-The default listener is `http://localhost:3000`. Use `.env.example` as a reference when supplying configuration through your runtime environment:
+Imports use the `@/*` alias, rooted at the repository directory. Tailwind is configured through `app/globals.css`, and `components.json` records the shadcn/ui setup for generated primitives.
+
+## Retained task API
+
+The original Express/SQLite task service is intentionally retained and is not coupled to the frontend bootstrap.
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev:api` | Start the API with file watching. |
+| `npm run build:api` | Compile the API to `dist/`. |
+| `npm run start:api` | Run the compiled API. |
+
+The API stores data in `data/tasks.sqlite` by default. Its environment variables are API-only:
 
 - `PORT` — HTTP port; defaults to `3000` and must be an integer from `1` through `65535`.
 - `DATABASE_PATH` — SQLite database path; defaults to `data/tasks.sqlite` and cannot be blank.
 
-For example:
+For example, choose a different port when the frontend is already using `3000`:
 
 ```bash
-PORT=3001 DATABASE_PATH=/tmp/tasks.sqlite npm run dev
+PORT=3001 DATABASE_PATH=/tmp/tasks.sqlite npm run dev:api
 ```
 
-This Node-only service has no public or client-side environment-variable surface. Do not add provider credentials until the corresponding server integration exists.
+### API routes
 
-## API
-
-`GET /health` returns `{ "status": "ok" }`.
-
-Tasks have the following shape:
-
-```json
-{
-  "id": 1,
-  "title": "Ship foundation",
-  "status": "pending",
-  "createdAt": "2026-09-30T00:00:00.000Z",
-  "updatedAt": "2026-09-30T00:00:00.000Z"
-}
-```
-
-The only valid statuses are `pending` and `completed`.
-
-```bash
-curl http://localhost:3000/tasks
-curl -X POST http://localhost:3000/tasks \
-  -H 'content-type: application/json' \
-  -d '{"title":"Ship foundation"}'
-curl -X PUT http://localhost:3000/tasks/1 \
-  -H 'content-type: application/json' \
-  -d '{"status":"completed"}'
-curl -X DELETE http://localhost:3000/tasks/1
-```
+- `GET /health` returns `{ "status": "ok" }`.
+- `GET /tasks` lists tasks.
+- `POST /tasks` creates a task.
+- `PUT /tasks/:id` updates a task.
+- `DELETE /tasks/:id` removes a task.
 
 ## Verification
 
@@ -83,3 +71,5 @@ npm run lint
 npm test -- --run
 npm run build
 ```
+
+Run `npm run dev` and load `http://localhost:3000` to check the frontend. Run `npm run dev:api` separately to check the retained service.
